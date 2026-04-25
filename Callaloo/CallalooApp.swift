@@ -2,16 +2,23 @@
 //  CallalooApp.swift
 //  Callaloo
 //
-//  Created by Bruce Elliott on 4/14/26.
-//
 
 import SwiftUI
+import FirebaseCore
 
 @main
 struct CallalooApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    @State private var session = SessionStore()
+
+    init() {
+        FirebaseApp.configure()
+    }
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
+                .environment(session)
         }
     }
 }

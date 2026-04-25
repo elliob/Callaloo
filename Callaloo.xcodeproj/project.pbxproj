@@ -6,6 +6,15 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		AC6FF0872F8F0468007A46F0 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = FBPDAUTH2F8EE6C7007A46F0 /* FirebaseAuth */; };
+		AC6FF0882F8F0468007A46F0 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = FBPDCORE2F8EE6C7007A46F0 /* FirebaseCore */; };
+		AC6FF0892F8F0468007A46F0 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = FBPDFIRE2F8EE6C7007A46F0 /* FirebaseFirestore */; };
+		AC6FF08A2F8F0468007A46F0 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = FBPDFUNC2F8EE6C7007A46F0 /* FirebaseFunctions */; };
+		AC6FF08B2F8F0468007A46F0 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = FBPDMSG2F8EE6C7007A46F0 /* FirebaseMessaging */; };
+		AC6FF08C2F8F0468007A46F0 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = GSPDGSIN2F8EE6C7007A46F0 /* GoogleSignIn */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		AC6FF05F2F8EE6C6007A46F0 /* Callaloo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Callaloo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +32,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC6FF08C2F8F0468007A46F0 /* GoogleSignIn in Frameworks */,
+				AC6FF08B2F8F0468007A46F0 /* FirebaseMessaging in Frameworks */,
+				AC6FF08A2F8F0468007A46F0 /* FirebaseFunctions in Frameworks */,
+				AC6FF0892F8F0468007A46F0 /* FirebaseFirestore in Frameworks */,
+				AC6FF0882F8F0468007A46F0 /* FirebaseCore in Frameworks */,
+				AC6FF0872F8F0468007A46F0 /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +80,12 @@
 			);
 			name = Callaloo;
 			packageProductDependencies = (
+				FBPDAUTH2F8EE6C7007A46F0 /* FirebaseAuth */,
+				FBPDCORE2F8EE6C7007A46F0 /* FirebaseCore */,
+				FBPDFIRE2F8EE6C7007A46F0 /* FirebaseFirestore */,
+				FBPDFUNC2F8EE6C7007A46F0 /* FirebaseFunctions */,
+				FBPDMSG2F8EE6C7007A46F0 /* FirebaseMessaging */,
+				GSPDGSIN2F8EE6C7007A46F0 /* GoogleSignIn */,
 			);
 			productName = Callaloo;
 			productReference = AC6FF05F2F8EE6C6007A46F0 /* Callaloo.app */;
@@ -94,6 +115,10 @@
 			);
 			mainGroup = AC6FF0562F8EE6C6007A46F0;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				FBPKG1002F8EE6C7007A46F0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				GSPKG1002F8EE6C7007A46F0 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AC6FF0602F8EE6C6007A46F0 /* Products */;
 			projectDirPath = "";
@@ -251,16 +276,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Callaloo/CallalooDebug.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 3KM7C284D9;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Config/Callaloo-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -283,16 +305,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Callaloo/CallalooRelease.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 3KM7C284D9;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Config/Callaloo-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -332,6 +351,58 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		FBPKG1002F8EE6C7007A46F0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.0.0;
+			};
+		};
+		GSPKG1002F8EE6C7007A46F0 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FBPDAUTH2F8EE6C7007A46F0 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FBPKG1002F8EE6C7007A46F0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		FBPDCORE2F8EE6C7007A46F0 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FBPKG1002F8EE6C7007A46F0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		FBPDFIRE2F8EE6C7007A46F0 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FBPKG1002F8EE6C7007A46F0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		FBPDFUNC2F8EE6C7007A46F0 /* FirebaseFunctions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FBPKG1002F8EE6C7007A46F0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFunctions;
+		};
+		FBPDMSG2F8EE6C7007A46F0 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FBPKG1002F8EE6C7007A46F0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+		GSPDGSIN2F8EE6C7007A46F0 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = GSPKG1002F8EE6C7007A46F0 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AC6FF0572F8EE6C6007A46F0 /* Project object */;
 }

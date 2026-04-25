@@ -1,0 +1,21 @@
+# Xcode / Swift
+DerivedData/
+build/
+*.xcuserstate
+*.xcscmblueprint
+xcuserdata/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# macOS
+.DS_Store
+
+# Local tooling (not for repo)
+.tmp-firebase-config/
+
+# Functions
+functions/node_modules/
+functions/lib/

@@ -1,0 +1,74 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function authed() {
+      return request.auth != null;
+    }
+
+    function uid() {
+      return request.auth.uid;
+    }
+
+    function memberDoc(householdId) {
+      return get(/databases/$(database)/documents/households/$(householdId)/members/$(uid()));
+    }
+
+    function isMember(householdId) {
+      return memberDoc(householdId).exists;
+    }
+
+    function isAdmin(householdId) {
+      return isMember(householdId) && memberDoc(householdId).data.role == 'admin';
+    }
+
+    function isParent(householdId) {
+      return isMember(householdId) && memberDoc(householdId).data.role == 'parent';
+    }
+
+    match /users/{userId} {
+      allow read: if authed() && userId == uid();
+
+      allow create: if authed() && userId == uid()
+        && !request.resource.data.keys().hasAny(['householdId', 'role']);
+
+      allow update: if authed() && userId == uid()
+        && request.resource.data.get('householdId', null) == resource.data.get('householdId', null)
+        && request.resource.data.get('role', null) == resource.data.get('role', null);
+    }
+
+    match /households/{householdId} {
+      allow read: if authed() && isMember(householdId);
+      allow create, delete: if false;
+      allow update: if authed() && isAdmin(householdId);
+
+      match /members/{memberId} {
+        allow read: if authed() && isMember(householdId);
+        allow write: if false;
+      }
+
+      match /listItems/{itemId} {
+        allow read: if authed() && isMember(householdId);
+        allow write: if authed() && isAdmin(householdId);
+      }
+
+      match /orderRequests/{orderId} {
+        allow read: if authed() && isMember(householdId);
+
+        allow create: if authed() && isParent(householdId)
+          && request.resource.data.status == 'pending'
+          && request.resource.data.createdByParentUid == uid();
+
+        allow update: if authed() && isAdmin(householdId)
+          && resource.data.status == 'pending'
+          && request.resource.data.status in ['ordered', 'cancelled'];
+
+        allow delete: if false;
+      }
+    }
+
+    match /invites/{inviteId} {
+      allow read, write: if false;
+    }
+  }
+}
