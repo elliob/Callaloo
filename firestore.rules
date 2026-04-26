@@ -26,6 +26,21 @@ service cloud.firestore {
       return isMember(householdId) && memberDoc(householdId).data.role == 'parent';
     }
 
+    // Admin UI uses users/{uid}.role; some tenants may be missing or out of sync with
+    // households/{hid}/members/{uid}. Trust users doc for admin only when it matches this
+    // household (clients cannot change householdId/role on their own user doc).
+    function hasAdminAccessToHousehold(householdId) {
+      let u = get(/databases/$(database)/documents/users/$(uid()));
+      return authed()
+        && u.exists
+        && u.data.get('householdId', '') == householdId
+        && u.data.get('role', '') == 'admin';
+    }
+
+    function canAdminHousehold(householdId) {
+      return isAdmin(householdId) || hasAdminAccessToHousehold(householdId);
+    }
+
     // Client may merge email, displayName, FCM fields, etc. Only Cloud Functions may set/change
     // householdId and role (via Admin SDK). Diff-based check avoids brittle equality on merges.
     function userTenantFieldsUnchanged() {
@@ -46,28 +61,28 @@ service cloud.firestore {
     }
 
     match /households/{householdId} {
-      allow read: if authed() && isMember(householdId);
+      allow read: if authed() && (isMember(householdId) || hasAdminAccessToHousehold(householdId));
       allow create, delete: if false;
-      allow update: if authed() && isAdmin(householdId);
+      allow update: if authed() && canAdminHousehold(householdId);
 
       match /members/{memberId} {
-        allow read: if authed() && isMember(householdId);
+        allow read: if authed() && (isMember(householdId) || hasAdminAccessToHousehold(householdId));
         allow write: if false;
       }
 
       match /listItems/{itemId} {
-        allow read: if authed() && isMember(householdId);
-        allow write: if authed() && isAdmin(householdId);
+        allow read: if authed() && (isMember(householdId) || hasAdminAccessToHousehold(householdId));
+        allow write: if authed() && canAdminHousehold(householdId);
       }
 
       match /orderRequests/{orderId} {
-        allow read: if authed() && isMember(householdId);
+        allow read: if authed() && (isMember(householdId) || hasAdminAccessToHousehold(householdId));
 
         allow create: if authed() && isParent(householdId)
           && request.resource.data.status == 'pending'
           && request.resource.data.createdByParentUid == uid();
 
-        allow update: if authed() && isAdmin(householdId)
+        allow update: if authed() && canAdminHousehold(householdId)
           && resource.data.status == 'pending'
           && request.resource.data.status in ['ordered', 'cancelled'];
 
