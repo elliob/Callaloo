@@ -44,15 +44,13 @@ struct HouseholdOnboardingView: View {
                         }
                     }
                 }
-                ToolbarItem(placement: .primaryAction) {
-                    Menu {
-                        Button("Sign out", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
-                            session.signOut()
-                        }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        session.signOut()
                     } label: {
-                        Image(systemName: "ellipsis.circle")
+                        Label("Log out", systemImage: "rectangle.portrait.and.arrow.right")
                     }
-                    .accessibilityLabel("More options")
+                    .accessibilityHint("Signs out of your account on this device")
                 }
             }
         }

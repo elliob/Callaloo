@@ -80,6 +80,7 @@ struct AdminFamilyView: View {
             }
             .callalooListBackground()
             .navigationTitle("Family")
+            .callalooLogOutButton()
         }
     }
 

@@ -62,18 +62,7 @@ struct AdminListView: View {
             .scrollContentBackground(.hidden)
             .callalooListBackground()
             .navigationTitle("Groceries")
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Menu {
-                        Button("Sign out", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
-                            session.signOut()
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
-                    }
-                    .accessibilityLabel("More options")
-                }
-            }
+            .callalooLogOutButton()
             .safeAreaInset(edge: .bottom) {
                 VStack(alignment: .leading, spacing: 10) {
                     if let errorMessage {

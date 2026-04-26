@@ -71,18 +71,7 @@ struct ParentMainView: View {
             .scrollContentBackground(.hidden)
             .callalooListBackground()
             .navigationTitle("Groceries")
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Menu {
-                        Button("Sign out", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
-                            session.signOut()
-                        }
-                    } label: {
-                        Image(systemName: "person.crop.circle")
-                    }
-                    .accessibilityLabel("Account")
-                }
-            }
+            .callalooLogOutButton()
             .safeAreaInset(edge: .bottom) {
                 VStack(spacing: 14) {
                     if let errorMessage {

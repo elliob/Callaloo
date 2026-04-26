@@ -45,6 +45,7 @@ struct AdminOrdersView: View {
                 }
             }
             .navigationTitle("To order")
+            .callalooLogOutButton()
             .safeAreaInset(edge: .bottom) {
                 if let errorMessage {
                     Text(errorMessage)
