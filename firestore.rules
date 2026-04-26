@@ -26,6 +26,19 @@ service cloud.firestore {
       return isMember(householdId) && memberDoc(householdId).data.role == 'parent';
     }
 
+    function householdDoc(householdId) {
+      return get(/databases/$(database)/documents/households/$(householdId));
+    }
+
+    // Fallback when users/{uid} or members/{uid} drift (manual edits, partial migrations).
+    // Household doc is only created/updated by Cloud Functions / Admin SDK in this app.
+    function isPrimaryAdminOfHousehold(householdId) {
+      let h = householdDoc(householdId);
+      return authed()
+        && h.exists
+        && string(h.data.get('primaryAdminUid', '')) == string(uid());
+    }
+
     // Admin UI uses users/{uid}.role; some tenants may be missing or out of sync with
     // households/{hid}/members/{uid}. Trust users doc for admin only when it matches this
     // household (clients cannot change householdId/role on their own user doc).
@@ -36,12 +49,14 @@ service cloud.firestore {
       return authed()
         && u.exists
         && string(hid) == string(householdId)
-        && role == 'admin';
+        && string(role) == 'admin';
     }
 
     // Prefer users/{uid} (Cloud Functions–written) first so OR short-circuits before member get().
     function canAdminHousehold(householdId) {
-      return hasAdminAccessToHousehold(householdId) || isAdmin(householdId);
+      return hasAdminAccessToHousehold(householdId)
+        || isAdmin(householdId)
+        || isPrimaryAdminOfHousehold(householdId);
     }
 
     // Client may merge email, displayName, FCM fields, etc. Only Cloud Functions may set/change
@@ -64,22 +79,34 @@ service cloud.firestore {
     }
 
     match /households/{householdId} {
-      allow read: if authed() && (isMember(householdId) || hasAdminAccessToHousehold(householdId));
+      allow read: if authed()
+        && (isMember(householdId)
+          || hasAdminAccessToHousehold(householdId)
+          || isPrimaryAdminOfHousehold(householdId));
       allow create, delete: if false;
       allow update: if authed() && canAdminHousehold(householdId);
 
       match /members/{memberId} {
-        allow read: if authed() && (isMember(householdId) || hasAdminAccessToHousehold(householdId));
+        allow read: if authed()
+          && (isMember(householdId)
+            || hasAdminAccessToHousehold(householdId)
+            || isPrimaryAdminOfHousehold(householdId));
         allow write: if false;
       }
 
       match /listItems/{itemId} {
-        allow read: if authed() && (isMember(householdId) || hasAdminAccessToHousehold(householdId));
+        allow read: if authed()
+          && (isMember(householdId)
+            || hasAdminAccessToHousehold(householdId)
+            || isPrimaryAdminOfHousehold(householdId));
         allow write: if authed() && canAdminHousehold(householdId);
       }
 
       match /orderRequests/{orderId} {
-        allow read: if authed() && (isMember(householdId) || hasAdminAccessToHousehold(householdId));
+        allow read: if authed()
+          && (isMember(householdId)
+            || hasAdminAccessToHousehold(householdId)
+            || isPrimaryAdminOfHousehold(householdId));
 
         allow create: if authed() && isParent(householdId)
           && request.resource.data.status == 'pending'
