@@ -30,90 +30,216 @@ struct HouseholdOnboardingView: View {
                     joinContent
                 }
             }
-            .navigationTitle("Your family")
+            .animation(.easeInOut(duration: 0.25), value: mode)
+            .navigationTitle(mode == .choose ? "Welcome" : "Your family")
+            .navigationBarTitleDisplayMode(mode == .choose ? .inline : .large)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     if mode != .choose {
-                        Button("Back") { mode = .choose }
+                        Button {
+                            mode = .choose
+                            session.clearError()
+                        } label: {
+                            Label("Back", systemImage: "chevron.backward")
+                        }
                     }
                 }
                 ToolbarItem(placement: .primaryAction) {
-                    Button("Sign out", role: .destructive) {
-                        session.signOut()
+                    Menu {
+                        Button("Sign out", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
+                            session.signOut()
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
                     }
+                    .accessibilityLabel("More options")
                 }
             }
         }
     }
 
     private var chooseContent: some View {
-        VStack(spacing: 24) {
-            Text("Choose how you use Callaloo.")
-                .font(.title3)
-                .multilineTextAlignment(.center)
-                .padding(.top, 24)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 28) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("How will you use Callaloo?")
+                        .font(.title2.bold())
+                    Text("Pick the path that matches you. You can always invite others later.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.top, 8)
 
-            VStack(spacing: 16) {
-                Button {
+                roleCard(
+                    title: "I shop for my family",
+                    subtitle: "Create the list, see order requests, and invite parents.",
+                    systemImage: "cart.fill",
+                    isPrimary: true
+                ) {
                     mode = .create
-                } label: {
-                    Text("I order for my family")
-                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
 
-                Button {
+                roleCard(
+                    title: "I’m a parent",
+                    subtitle: "Join with a code from your family admin and request orders from the list.",
+                    systemImage: "person.2.fill",
+                    isPrimary: false
+                ) {
                     mode = .join
-                } label: {
-                    Text("I’m a parent using the list")
-                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
             }
-            .padding(.horizontal)
-
-            Spacer()
+            .padding(.horizontal, 20)
+            .padding(.bottom, 32)
+            .frame(maxWidth: CallalooTheme.contentMaxWidth)
+            .frame(maxWidth: .infinity)
         }
+        .callalooAuthBackground()
+    }
+
+    private func roleCard(
+        title: String,
+        subtitle: String,
+        systemImage: String,
+        isPrimary: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(alignment: .top, spacing: 16) {
+                Image(systemName: systemImage)
+                    .font(.title2)
+                    .foregroundStyle(isPrimary ? .white : Color.accentColor)
+                    .frame(width: 44, height: 44)
+                    .background {
+                        Circle()
+                            .fill(isPrimary ? Color.white.opacity(0.22) : Color.accentColor.opacity(0.15))
+                    }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(title)
+                        .font(.headline)
+                        .foregroundStyle(isPrimary ? .white : .primary)
+                    Text(subtitle)
+                        .font(.subheadline)
+                        .foregroundStyle(isPrimary ? .white.opacity(0.9) : .secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer(minLength: 0)
+
+                Image(systemName: "chevron.right")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(isPrimary ? .white.opacity(0.8) : Color.accentColor.opacity(0.7))
+            }
+            .padding(18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background {
+                Group {
+                    if isPrimary {
+                        RoundedRectangle(cornerRadius: CallalooTheme.cornerRadiusLarge, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color.accentColor, Color.accentColor.opacity(0.78)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                    } else {
+                        RoundedRectangle(cornerRadius: CallalooTheme.cornerRadiusLarge, style: .continuous)
+                            .fill(Color(.secondarySystemGroupedBackground))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: CallalooTheme.cornerRadiusLarge, style: .continuous)
+                                    .strokeBorder(Color.accentColor.opacity(0.22), lineWidth: 1)
+                            }
+                    }
+                }
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     private var createContent: some View {
-        Form {
-            Section("Family name") {
-                TextField("e.g. Mom & Dad", text: $familyName)
+        formShell {
+            VStack(alignment: .leading, spacing: 14) {
+                Text("Family name")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                TextField("e.g. The Elliots", text: $familyName)
+                    .textFieldStyle(.plain)
+                    .padding(14)
+                    .background {
+                        RoundedRectangle(cornerRadius: CallalooTheme.cornerRadiusMedium, style: .continuous)
+                            .fill(Color(.secondarySystemGroupedBackground))
+                    }
             }
-            Section {
-                Button("Create family space") {
-                    Task { await create() }
-                }
-                .disabled(isBusy || familyName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+            Button {
+                Task { await create() }
+            } label: {
+                Text("Create family space")
             }
+            .buttonStyle(CallalooPrimaryCTAButtonStyle(isLoading: isBusy))
+            .disabled(isBusy || familyName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
             if let message = session.lastErrorMessage {
-                Section { Text(message).foregroundStyle(.red).font(.footnote) }
+                errorBanner(message)
             }
         }
-        .overlay { if isBusy { ProgressView() } }
     }
 
     private var joinContent: some View {
-        Form {
-            Section("Invite code") {
-                TextField("Paste the code from your child", text: $inviteCode)
+        formShell {
+            VStack(alignment: .leading, spacing: 14) {
+                Text("Invite code")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                TextField("Paste the code from your admin", text: $inviteCode)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
+                    .textFieldStyle(.plain)
+                    .padding(14)
+                    .background {
+                        RoundedRectangle(cornerRadius: CallalooTheme.cornerRadiusMedium, style: .continuous)
+                            .fill(Color(.secondarySystemGroupedBackground))
+                    }
             }
-            Section {
-                Button("Join family") {
-                    Task { await join() }
-                }
-                .disabled(isBusy || inviteCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+            Button {
+                Task { await join() }
+            } label: {
+                Text("Join family")
             }
+            .buttonStyle(CallalooPrimaryCTAButtonStyle(isLoading: isBusy))
+            .disabled(isBusy || inviteCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
             if let message = session.lastErrorMessage {
-                Section { Text(message).foregroundStyle(.red).font(.footnote) }
+                errorBanner(message)
             }
         }
-        .overlay { if isBusy { ProgressView() } }
+    }
+
+    private func formShell<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 22) {
+                content()
+            }
+            .padding(22)
+            .frame(maxWidth: CallalooTheme.contentMaxWidth)
+            .frame(maxWidth: .infinity)
+        }
+        .callalooAuthBackground()
+        .scrollDismissesKeyboard(.interactively)
+    }
+
+    private func errorBanner(_ text: String) -> some View {
+        Text(text)
+            .font(.footnote)
+            .foregroundStyle(.red)
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background {
+                RoundedRectangle(cornerRadius: CallalooTheme.cornerRadiusSmall, style: .continuous)
+                    .fill(Color.red.opacity(0.1))
+            }
     }
 
     private func create() async {

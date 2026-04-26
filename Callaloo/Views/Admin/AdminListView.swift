@@ -18,60 +18,108 @@ struct AdminListView: View {
     var body: some View {
         NavigationStack {
             List {
-                ForEach(model.items) { item in
-                    HStack(alignment: .top) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(item.title)
-                                .font(.headline)
-                            if !item.notes.isEmpty {
-                                Text(item.notes)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
+                Section {
+                    ForEach(model.items) { item in
+                        HStack(alignment: .top, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(item.title)
+                                    .font(.body.weight(.semibold))
+                                if !item.notes.isEmpty {
+                                    Text(item.notes)
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            Spacer(minLength: 8)
+                            Button {
+                                Task { await toggleFavorite(item) }
+                            } label: {
+                                Image(systemName: item.isFavorite ? "star.fill" : "star")
+                                    .font(.body)
+                                    .foregroundStyle(item.isFavorite ? Color.yellow : Color.secondary)
+                                    .symbolRenderingMode(.hierarchical)
+                                    .frame(width: 36, height: 36)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.borderless)
+                            .accessibilityLabel(item.isFavorite ? "Remove favorite" : "Mark favorite")
+                        }
+                        .padding(.vertical, 2)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button("Hide", systemImage: "eye.slash", role: .destructive) {
+                                Task { await setActive(item, active: false) }
                             }
                         }
-                        Spacer()
-                        Button {
-                            Task { await toggleFavorite(item) }
-                        } label: {
-                            Image(systemName: item.isFavorite ? "star.fill" : "star")
-                                .foregroundStyle(item.isFavorite ? .yellow : .secondary)
-                        }
-                        .buttonStyle(.borderless)
                     }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button("Hide", role: .destructive) {
-                            Task { await setActive(item, active: false) }
-                        }
-                    }
+                } header: {
+                    Label("Visible to parents", systemImage: "eye")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .textCase(nil)
                 }
             }
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .callalooListBackground()
             .navigationTitle("Groceries")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button("Sign out", role: .destructive) {
-                        session.signOut()
+                    Menu {
+                        Button("Sign out", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
+                            session.signOut()
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
                     }
+                    .accessibilityLabel("More options")
                 }
             }
             .safeAreaInset(edge: .bottom) {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 10) {
                     if let errorMessage {
                         Text(errorMessage)
                             .font(.footnote)
                             .foregroundStyle(.red)
                     }
-                    HStack {
+                    HStack(alignment: .center, spacing: 10) {
                         TextField("Add an item", text: $newTitle)
-                            .textFieldStyle(.roundedBorder)
-                        Button("Add") {
+                            .textFieldStyle(.plain)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 12)
+                            .background {
+                                RoundedRectangle(cornerRadius: CallalooTheme.cornerRadiusMedium, style: .continuous)
+                                    .fill(Color(.secondarySystemGroupedBackground))
+                            }
+                            .submitLabel(.done)
+                            .onSubmit { Task { await addItem() } }
+
+                        Button {
                             Task { await addItem() }
+                        } label: {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title)
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(.white, Color.accentColor)
                         }
                         .disabled(newTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSaving)
+                        .accessibilityLabel("Add item")
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 8)
+                    .padding(.bottom, 6)
                 }
-                .background(.ultraThinMaterial)
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+                .background {
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .mask {
+                            LinearGradient(
+                                colors: [.black, .black.opacity(0.92)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        }
+                        .ignoresSafeArea(edges: .bottom)
+                }
             }
             .task(id: householdId) {
                 guard let householdId else { return }

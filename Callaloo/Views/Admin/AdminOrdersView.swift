@@ -14,32 +14,34 @@ struct AdminOrdersView: View {
 
     private var householdId: String? { session.userProfile?.householdId }
 
+    private var pendingOrders: [OrderRequest] {
+        model.orders.filter { $0.status == .pending }
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
                 List {
-                    ForEach(model.orders.filter { $0.status == .pending }) { order in
+                    ForEach(pendingOrders) { order in
                         NavigationLink {
                             AdminOrderDetailView(order: order, householdId: householdId ?? "")
                         } label: {
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text(order.createdAt.map { Self.format($0) } ?? "New request")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                                Text(order.itemsSnapshot.map { $0["title"] ?? "" }.joined(separator: ", "))
-                                    .font(.body)
-                                    .lineLimit(2)
-                            }
+                            orderRow(order)
                         }
+                        .listRowInsets(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 16))
                     }
                 }
+                .listStyle(.insetGrouped)
+                .scrollContentBackground(.hidden)
+                .callalooListBackground()
 
-                if model.orders.filter({ $0.status == .pending }).isEmpty {
+                if pendingOrders.isEmpty {
                     ContentUnavailableView(
-                        "No open requests",
-                        systemImage: "checkmark.circle",
-                        description: Text("When a parent taps Order, it will show up here.")
+                        "All caught up",
+                        systemImage: "checkmark.circle.fill",
+                        description: Text("When a parent requests an order from their list, it will appear here.")
                     )
+                    .padding(.bottom, 40)
                 }
             }
             .navigationTitle("To order")
@@ -49,8 +51,8 @@ struct AdminOrdersView: View {
                         .font(.footnote)
                         .foregroundStyle(.red)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal)
-                        .padding(.vertical, 8)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
                         .background(.ultraThinMaterial)
                 }
             }
@@ -60,6 +62,29 @@ struct AdminOrdersView: View {
             }
             .onDisappear { model.stop() }
         }
+    }
+
+    private func orderRow(_ order: OrderRequest) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(order.createdAt.map { Self.format($0) } ?? "New request")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background {
+                        Capsule()
+                            .fill(Color.accentColor.opacity(0.12))
+                    }
+                Spacer(minLength: 0)
+            }
+            Text(order.itemsSnapshot.map { $0["title"] ?? "" }.joined(separator: ", "))
+                .font(.body.weight(.medium))
+                .foregroundStyle(.primary)
+                .lineLimit(3)
+                .multilineTextAlignment(.leading)
+        }
+        .padding(.vertical, 4)
     }
 
     private static func format(_ date: Date) -> String {
@@ -80,26 +105,52 @@ struct AdminOrderDetailView: View {
 
     var body: some View {
         List {
-            Section("Items") {
+            Section {
                 ForEach(order.itemsSnapshot.indices, id: \.self) { index in
                     let row = order.itemsSnapshot[index]
-                    Text(row["title"] ?? "Item")
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
+                        Image(systemName: "circle.fill")
+                            .font(.system(size: 6))
+                            .foregroundStyle(Color.accentColor.opacity(0.6))
+                            .accessibilityHidden(true)
+                        Text(row["title"] ?? "Item")
+                            .font(.body)
+                    }
+                    .padding(.vertical, 2)
                 }
+            } header: {
+                Text("Items in this request")
+                    .textCase(nil)
             }
 
             Section {
-                Button("Mark as ordered") {
+                Button {
                     Task { await markOrdered() }
+                } label: {
+                    HStack(spacing: 10) {
+                        if isMarking {
+                            ProgressView()
+                        }
+                        Text("Mark as ordered")
+                    }
+                    .frame(maxWidth: .infinity)
                 }
+                .buttonStyle(.borderedProminent)
                 .disabled(isMarking)
+                .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
             }
 
             if let errorMessage {
                 Section {
-                    Text(errorMessage).foregroundStyle(.red).font(.footnote)
+                    Text(errorMessage)
+                        .foregroundStyle(.red)
+                        .font(.footnote)
                 }
             }
         }
+        .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .callalooListBackground()
         .navigationTitle("Request")
         .navigationBarTitleDisplayMode(.inline)
     }

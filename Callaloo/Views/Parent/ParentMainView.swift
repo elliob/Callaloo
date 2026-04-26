@@ -30,35 +30,61 @@ struct ParentMainView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Your list") {
+                Section {
                     if displayedItems.isEmpty {
-                        Text("Your family admin hasn’t added items yet.")
-                            .foregroundStyle(.secondary)
+                        ContentUnavailableView(
+                            "Nothing on the list yet",
+                            systemImage: "list.bullet.rectangle.portrait",
+                            description: Text("When your family admin adds groceries, they will appear here.")
+                        )
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
                     } else {
                         ForEach(displayedItems) { item in
-                            HStack {
+                            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                                Circle()
+                                    .fill(Color.accentColor.opacity(0.2))
+                                    .frame(width: 8, height: 8)
+                                    .accessibilityHidden(true)
                                 Text(item.title)
+                                    .font(.body.weight(.medium))
+                                Spacer(minLength: 0)
                                 if item.isFavorite {
                                     Image(systemName: "star.fill")
+                                        .font(.body)
                                         .foregroundStyle(.yellow)
+                                        .symbolRenderingMode(.hierarchical)
                                         .accessibilityLabel("Favorite")
                                 }
                             }
-                            .font(.title3)
+                            .padding(.vertical, 4)
                         }
                     }
+                } header: {
+                    Label("Your list", systemImage: "basket.fill")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .textCase(nil)
                 }
             }
-            .navigationTitle("Callaloo")
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .callalooListBackground()
+            .navigationTitle("Groceries")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button("Sign out", role: .destructive) {
-                        session.signOut()
+                    Menu {
+                        Button("Sign out", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
+                            session.signOut()
+                        }
+                    } label: {
+                        Image(systemName: "person.crop.circle")
                     }
+                    .accessibilityLabel("Account")
                 }
             }
             .safeAreaInset(edge: .bottom) {
-                VStack(spacing: 12) {
+                VStack(spacing: 14) {
                     if let errorMessage {
                         Text(errorMessage)
                             .font(.footnote)
@@ -68,17 +94,33 @@ struct ParentMainView: View {
                     Button {
                         Task { await placeOrder() }
                     } label: {
-                        Text("Order")
-                            .font(.title2.weight(.semibold))
-                            .frame(maxWidth: .infinity)
+                        HStack(spacing: 10) {
+                            if isSubmitting {
+                                ProgressView()
+                                    .tint(.white)
+                            }
+                            Text(displayedItems.isEmpty ? "Nothing to order" : "Request order")
+                        }
                     }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .padding(.horizontal)
+                    .buttonStyle(CallalooPrimaryCTAButtonStyle(isLoading: isSubmitting))
                     .disabled(isSubmitting || displayedItems.isEmpty)
-                    .padding(.bottom, 8)
+                    .padding(.horizontal, 4)
+                    .padding(.bottom, 6)
                 }
-                .background(.ultraThinMaterial)
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+                .background {
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .mask {
+                            LinearGradient(
+                                colors: [.black, .black.opacity(0.92)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        }
+                        .ignoresSafeArea(edges: .bottom)
+                }
             }
             .sheet(isPresented: $showThanks) {
                 ParentThanksView {
@@ -147,21 +189,31 @@ private struct ParentThanksView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 64))
-                    .foregroundStyle(.green)
-                Text("You’re all set")
-                    .font(.title)
-                Text("We’ve received your order request. It may take a little while to arrive depending on delivery.")
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(.secondary)
-                Button("Close") {
-                    onDismiss()
+            VStack(spacing: 24) {
+                Image(systemName: "paperplane.circle.fill")
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(Color.accentColor, Color.accentColor.opacity(0.3))
+                    .font(.system(size: 72))
+                    .accessibilityHidden(true)
+
+                VStack(spacing: 10) {
+                    Text("Request sent")
+                        .font(.title.bold())
+                    Text("Your family shopper has the list. Delivery timing depends on how they fulfill orders.")
+                        .font(.body)
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                .buttonStyle(.borderedProminent)
+
+                Button("Done", action: onDismiss)
+                    .buttonStyle(CallalooPrimaryCTAButtonStyle())
+                    .padding(.horizontal, 8)
             }
-            .padding()
+            .padding(28)
+            .frame(maxWidth: CallalooTheme.contentMaxWidth)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color(.systemGroupedBackground))
             .navigationTitle("Thank you")
             .navigationBarTitleDisplayMode(.inline)
         }

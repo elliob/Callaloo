@@ -19,8 +19,25 @@ struct RootView: View {
             } else if session.role == .parent {
                 ParentMainView()
             } else {
-                ProgressView("Loading your profile…")
-                    .padding()
+                VStack(spacing: 20) {
+                    ProgressView()
+                        .scaleEffect(1.1)
+                    Text("Loading your profile…")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background {
+                    LinearGradient(
+                        colors: [
+                            Color.accentColor.opacity(0.1),
+                            Color(.systemGroupedBackground),
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .ignoresSafeArea()
+                }
             }
         }
     }
