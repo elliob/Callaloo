@@ -80,6 +80,10 @@ struct AdminListView: View {
                         Text(errorMessage)
                             .font(.footnote)
                             .foregroundStyle(.red)
+                    } else if let listenErr = model.lastListenError {
+                        Text(listenErr)
+                            .font(.footnote)
+                            .foregroundStyle(.red)
                     }
                     HStack(alignment: .center, spacing: 10) {
                         TextField("Add an item", text: $newTitle)

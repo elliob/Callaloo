@@ -31,14 +31,17 @@ service cloud.firestore {
     // household (clients cannot change householdId/role on their own user doc).
     function hasAdminAccessToHousehold(householdId) {
       let u = get(/databases/$(database)/documents/users/$(uid()));
+      let hid = u.data.get('householdId', '');
+      let role = u.data.get('role', '');
       return authed()
         && u.exists
-        && u.data.get('householdId', '') == householdId
-        && u.data.get('role', '') == 'admin';
+        && string(hid) == string(householdId)
+        && role == 'admin';
     }
 
+    // Prefer users/{uid} (Cloud Functions–written) first so OR short-circuits before member get().
     function canAdminHousehold(householdId) {
-      return isAdmin(householdId) || hasAdminAccessToHousehold(householdId);
+      return hasAdminAccessToHousehold(householdId) || isAdmin(householdId);
     }
 
     // Client may merge email, displayName, FCM fields, etc. Only Cloud Functions may set/change
