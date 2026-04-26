@@ -26,15 +26,23 @@ service cloud.firestore {
       return isMember(householdId) && memberDoc(householdId).data.role == 'parent';
     }
 
+    // Client may merge email, displayName, FCM fields, etc. Only Cloud Functions may set/change
+    // householdId and role (via Admin SDK). Diff-based check avoids brittle equality on merges.
+    function userTenantFieldsUnchanged() {
+      let locked = ['householdId', 'role'];
+      let d = request.resource.data.diff(resource.data);
+      return !d.changedKeys().hasAny(locked)
+        && !d.addedKeys().hasAny(locked)
+        && !d.removedKeys().hasAny(locked);
+    }
+
     match /users/{userId} {
       allow read: if authed() && userId == uid();
 
       allow create: if authed() && userId == uid()
         && !request.resource.data.keys().hasAny(['householdId', 'role']);
 
-      allow update: if authed() && userId == uid()
-        && request.resource.data.get('householdId', null) == resource.data.get('householdId', null)
-        && request.resource.data.get('role', null) == resource.data.get('role', null);
+      allow update: if authed() && userId == uid() && userTenantFieldsUnchanged();
     }
 
     match /households/{householdId} {
