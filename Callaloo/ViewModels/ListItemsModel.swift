@@ -5,6 +5,8 @@
 
 import Foundation
 import Observation
+import FirebaseAuth
+import FirebaseCore
 import FirebaseFirestore
 
 @Observable
@@ -27,7 +29,9 @@ final class ListItemsModel {
                 Task { @MainActor in
                     guard let self else { return }
                     if let error {
-                        self.lastListenError = error.localizedDescription
+                        let uid = Auth.auth().currentUser?.uid ?? "nil"
+                        let project = FirebaseApp.app()?.options.projectID ?? "unknown"
+                        self.lastListenError = "\(error.localizedDescription) [project=\(project) uid=\(uid) household=\(householdId)]"
                         self.items = []
                         return
                     }
