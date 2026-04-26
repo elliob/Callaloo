@@ -18,7 +18,11 @@ struct UserProfile: Equatable, Sendable {
 
     static func from(_ snapshot: DocumentSnapshot) -> UserProfile? {
         guard snapshot.exists, let data = snapshot.data() else { return nil }
-        let householdId = data["householdId"] as? String
+        let householdId: String? = {
+            guard let raw = data["householdId"] as? String else { return nil }
+            let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmed.isEmpty ? nil : trimmed
+        }()
         let role = (data["role"] as? String).flatMap(UserRole.init(rawValue:))
         return UserProfile(
             householdId: householdId,

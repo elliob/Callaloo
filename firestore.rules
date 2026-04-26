@@ -19,11 +19,13 @@ service cloud.firestore {
     }
 
     function isAdmin(householdId) {
-      return isMember(householdId) && memberDoc(householdId).data.role == 'admin';
+      return isMember(householdId)
+        && string(memberDoc(householdId).data.get('role', '')) == 'admin';
     }
 
     function isParent(householdId) {
-      return isMember(householdId) && memberDoc(householdId).data.role == 'parent';
+      return isMember(householdId)
+        && string(memberDoc(householdId).data.get('role', '')) == 'parent';
     }
 
     function householdDoc(householdId) {
