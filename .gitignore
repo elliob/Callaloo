@@ -16,6 +16,11 @@ xcuserdata/
 # Local tooling (not for repo)
 .tmp-firebase-config/
 
+# Firebase iOS (API keys; download locally — see README / firebase-ios-bootstrap.sh)
+Callaloo/GoogleService-Info.plist
+
 # Functions
 functions/node_modules/
 functions/lib/
+.vercel
+.env*.local
