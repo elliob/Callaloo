@@ -9,6 +9,35 @@ import FirebaseFunctions
 enum HouseholdService {
     private static let functions = Functions.functions(region: "us-central1")
 
+    /// Maps Firebase Callable errors to clearer copy. A bare **"NOT FOUND"** is HTTP 404 on the
+    /// function URL (e.g. `createHousehold` not deployed), not the invite “not found” case (that
+    /// includes the server message from `HttpsError`).
+    static func userFacingMessage(forCallableError error: Error) -> String {
+        let ns = error as NSError
+        guard ns.domain == FunctionsErrorDomain,
+              let code = FunctionsErrorCode(rawValue: ns.code)
+        else {
+            return error.localizedDescription
+        }
+        let description = ns.localizedDescription
+        switch code {
+        case .notFound:
+            if description == "NOT FOUND" {
+                return "Couldn’t reach the family service. Deploy Cloud Functions to this Firebase project (README: Backend setup), then try again."
+            }
+            return description
+        case .unimplemented:
+            if description == "UNIMPLEMENTED" {
+                return "That server feature isn’t available. Deploy the latest Cloud Functions, then try again."
+            }
+            return description
+        case .unavailable:
+            return "The service is temporarily unavailable. Try again in a moment."
+        default:
+            return description
+        }
+    }
+
     static func createHousehold(displayName: String) async throws -> String {
         let result = try await functions.httpsCallable("createHousehold").call(["displayName": displayName])
         guard let dict = result.data as? [String: Any],

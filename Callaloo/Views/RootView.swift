@@ -20,6 +20,11 @@ struct RootView: View {
                 ParentMainView()
             } else {
                 VStack(spacing: 20) {
+                    Image("CallalooMark")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 56, height: 56)
+                        .accessibilityHidden(true)
                     ProgressView()
                         .scaleEffect(1.1)
                     Text("Loading your profile…")

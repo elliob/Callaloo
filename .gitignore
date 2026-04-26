@@ -22,5 +22,7 @@ Callaloo/GoogleService-Info.plist
 # Functions
 functions/node_modules/
 functions/lib/
+# Firebase CLI parameterized config / secrets (e.g. RESEND_API_KEY)
+functions/.env.*
 .vercel
 .env*.local

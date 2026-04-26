@@ -91,7 +91,7 @@ struct AdminFamilyView: View {
         do {
             inviteId = try await HouseholdService.createParentInvite(householdId: householdId)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = HouseholdService.userFacingMessage(forCallableError: error)
         }
     }
 }

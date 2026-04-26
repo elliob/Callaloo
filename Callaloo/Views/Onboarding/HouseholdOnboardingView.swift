@@ -61,6 +61,12 @@ struct HouseholdOnboardingView: View {
     private var chooseContent: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
+                Image("CallalooMark")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 48, height: 48)
+                    .accessibilityHidden(true)
+
                 VStack(alignment: .leading, spacing: 8) {
                     Text("How will you use Callaloo?")
                         .font(.title2.bold())
@@ -251,7 +257,7 @@ struct HouseholdOnboardingView: View {
                 displayName: familyName.trimmingCharacters(in: .whitespacesAndNewlines)
             )
         } catch {
-            session.lastErrorMessage = error.localizedDescription
+            session.lastErrorMessage = HouseholdService.userFacingMessage(forCallableError: error)
         }
     }
 
@@ -262,7 +268,7 @@ struct HouseholdOnboardingView: View {
         do {
             _ = try await HouseholdService.redeemParentInvite(inviteId: inviteCode)
         } catch {
-            session.lastErrorMessage = error.localizedDescription
+            session.lastErrorMessage = HouseholdService.userFacingMessage(forCallableError: error)
         }
     }
 }

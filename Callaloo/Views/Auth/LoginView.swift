@@ -120,11 +120,11 @@ struct LoginView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: "leaf.circle.fill")
-                .symbolRenderingMode(.palette)
-                .foregroundStyle(Color.accentColor, Color.accentColor.opacity(0.35))
-                .font(.system(size: 52))
-                .accessibilityHidden(true)
+            Image("CallalooMark")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 64, height: 64)
+                .accessibilityLabel("Callaloo")
 
             Text("Callaloo")
                 .font(.largeTitle.bold())
