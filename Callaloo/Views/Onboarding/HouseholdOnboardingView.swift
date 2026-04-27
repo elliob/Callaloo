@@ -247,6 +247,7 @@ struct HouseholdOnboardingView: View {
     }
 
     private func create() async {
+        guard !isBusy else { return }
         session.clearError()
         isBusy = true
         defer { isBusy = false }
@@ -260,6 +261,7 @@ struct HouseholdOnboardingView: View {
     }
 
     private func join() async {
+        guard !isBusy else { return }
         session.clearError()
         isBusy = true
         defer { isBusy = false }
