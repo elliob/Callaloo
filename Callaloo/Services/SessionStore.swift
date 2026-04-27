@@ -45,7 +45,9 @@ final class SessionStore {
 
     func signOut() {
         do {
-            try Auth.auth().signOut()
+            try AuthActions.signOut()
+            user = nil
+            userProfile = nil
         } catch {
             lastErrorMessage = error.localizedDescription
         }
@@ -63,9 +65,9 @@ final class SessionStore {
         profileListener?.remove()
         profileListener = nil
         self.user = user
+        userProfile = nil
 
         guard let user else {
-            userProfile = nil
             return
         }
 

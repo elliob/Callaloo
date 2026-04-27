@@ -9,6 +9,11 @@ import FirebaseCore
 import GoogleSignIn
 
 enum AuthActions {
+    static func signOut() throws {
+        GIDSignIn.sharedInstance.signOut()
+        try Auth.auth().signOut()
+    }
+
     static func signInWithGoogle() async throws {
         guard let clientID = FirebaseApp.app()?.options.clientID else {
             throw AuthActionError.missingClientID
