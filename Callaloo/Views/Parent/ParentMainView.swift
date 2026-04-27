@@ -15,6 +15,7 @@ struct ParentMainView: View {
     @State private var showThanks = false
     @State private var errorMessage: String?
     @State private var processedOrderedIds: Set<String> = []
+    @State private var selectedItemIds: Set<String> = []
 
     private var householdId: String? { session.userProfile?.householdId }
 
@@ -26,6 +27,12 @@ struct ParentMainView: View {
                 return lhs.sortOrder < rhs.sortOrder
             }
     }
+
+    private var selectedItems: [ListItem] {
+        displayedItems.filter { selectedItemIds.contains($0.id) }
+    }
+
+    private var displayedItemIds: [String] { displayedItems.map(\.id) }
 
     var body: some View {
         NavigationStack {
@@ -41,23 +48,34 @@ struct ParentMainView: View {
                         .listRowSeparator(.hidden)
                     } else {
                         ForEach(displayedItems) { item in
-                            HStack(alignment: .firstTextBaseline, spacing: 12) {
-                                Circle()
-                                    .fill(Color.accentColor.opacity(0.2))
-                                    .frame(width: 8, height: 8)
-                                    .accessibilityHidden(true)
-                                Text(item.title)
-                                    .font(.body.weight(.medium))
-                                Spacer(minLength: 0)
-                                if item.isFavorite {
-                                    Image(systemName: "star.fill")
-                                        .font(.body)
-                                        .foregroundStyle(.yellow)
-                                        .symbolRenderingMode(.hierarchical)
-                                        .accessibilityLabel("Favorite")
+                            let isSelected = selectedItemIds.contains(item.id)
+                            Button {
+                                toggleSelection(item.id)
+                            } label: {
+                                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                                        .font(.title3)
+                                        .foregroundStyle(isSelected ? Color.accentColor : .secondary.opacity(0.55))
+                                        .accessibilityHidden(true)
+                                    Text(item.title)
+                                        .font(.body.weight(.medium))
+                                        .foregroundStyle(.primary)
+                                        .multilineTextAlignment(.leading)
+                                    Spacer(minLength: 0)
+                                    if item.isFavorite {
+                                        Image(systemName: "star.fill")
+                                            .font(.body)
+                                            .foregroundStyle(.yellow)
+                                            .symbolRenderingMode(.hierarchical)
+                                            .accessibilityLabel("Favorite")
+                                    }
                                 }
+                                .padding(.vertical, 4)
+                                .contentShape(Rectangle())
                             }
-                            .padding(.vertical, 4)
+                            .buttonStyle(.plain)
+                            .accessibilityHint("Adds or removes this item from your order request")
+                            .accessibilityLabel("\(item.title)\(item.isFavorite ? ", favorite" : "")\(isSelected ? ", selected for order" : ", not selected")")
                         }
                     }
                 } header: {
@@ -65,6 +83,12 @@ struct ParentMainView: View {
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.secondary)
                         .textCase(nil)
+                } footer: {
+                    if !displayedItems.isEmpty {
+                        Text("Tap items to include in your request.")
+                            .font(.footnote)
+                            .foregroundStyle(.tertiary)
+                    }
                 }
             }
             .listStyle(.insetGrouped)
@@ -88,11 +112,11 @@ struct ParentMainView: View {
                                 ProgressView()
                                     .tint(.white)
                             }
-                            Text(displayedItems.isEmpty ? "Nothing to order" : "Request order")
+                            Text(orderButtonTitle)
                         }
                     }
                     .buttonStyle(CallalooPrimaryCTAButtonStyle(isLoading: isSubmitting))
-                    .disabled(isSubmitting || displayedItems.isEmpty)
+                    .disabled(isSubmitting || displayedItems.isEmpty || selectedItemIds.isEmpty)
                     .padding(.horizontal, 4)
                     .padding(.bottom, 6)
                 }
@@ -129,6 +153,25 @@ struct ParentMainView: View {
             .onChange(of: ordersModel.orders) { _, newOrders in
                 handleNewlyOrdered(newOrders)
             }
+            .onChange(of: displayedItemIds) { _, ids in
+                let valid = Set(ids)
+                selectedItemIds = selectedItemIds.intersection(valid)
+            }
+        }
+    }
+
+    private var orderButtonTitle: String {
+        if displayedItems.isEmpty { return "Nothing to order" }
+        if selectedItemIds.isEmpty { return "Select items to order" }
+        if selectedItemIds.count == 1 { return "Request order" }
+        return "Request order (\(selectedItemIds.count))"
+    }
+
+    private func toggleSelection(_ id: String) {
+        if selectedItemIds.contains(id) {
+            selectedItemIds.remove(id)
+        } else {
+            selectedItemIds.insert(id)
         }
     }
 
@@ -152,7 +195,9 @@ struct ParentMainView: View {
         isSubmitting = true
         defer { isSubmitting = false }
         do {
-            let snapshot: [[String: String]] = displayedItems.map { ["title": $0.title] }
+            let snapshot: [[String: String]] = selectedItems.map {
+                ["title": $0.title, "listItemId": $0.id]
+            }
             let ref = Firestore.firestore()
                 .collection("households")
                 .document(householdId)
@@ -166,6 +211,7 @@ struct ParentMainView: View {
                     "createdAt": FieldValue.serverTimestamp(),
                 ]
             )
+            selectedItemIds = []
             showThanks = true
         } catch {
             errorMessage = error.localizedDescription
