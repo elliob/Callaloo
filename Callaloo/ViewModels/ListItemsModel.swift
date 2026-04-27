@@ -29,9 +29,11 @@ final class ListItemsModel {
                 Task { @MainActor in
                     guard let self else { return }
                     if let error {
-                        let uid = Auth.auth().currentUser?.uid ?? "nil"
+                        let currentUser = Auth.auth().currentUser
+                        let uid = currentUser?.uid ?? "nil"
+                        let email = currentUser?.email ?? "nil"
                         let project = FirebaseApp.app()?.options.projectID ?? "unknown"
-                        self.lastListenError = "\(error.localizedDescription) [project=\(project) uid=\(uid) household=\(householdId)]"
+                        self.lastListenError = "\(error.localizedDescription) [project=\(project) uid=\(uid) email=\(email) household=\(householdId)]"
                         self.items = []
                         return
                     }
