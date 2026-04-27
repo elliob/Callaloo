@@ -15,17 +15,17 @@ service cloud.firestore {
     }
 
     function isMember(householdId) {
-      return memberDoc(householdId).exists;
+      return exists(/databases/$(database)/documents/households/$(householdId)/members/$(uid()));
     }
 
     function isAdmin(householdId) {
       return isMember(householdId)
-        && string(memberDoc(householdId).data.get('role', '')) == 'admin';
+        && memberDoc(householdId).data.get('role', '') == 'admin';
     }
 
     function isParent(householdId) {
       return isMember(householdId)
-        && string(memberDoc(householdId).data.get('role', '')) == 'parent';
+        && memberDoc(householdId).data.get('role', '') == 'parent';
     }
 
     function householdDoc(householdId) {
@@ -37,8 +37,8 @@ service cloud.firestore {
     function isPrimaryAdminOfHousehold(householdId) {
       let h = householdDoc(householdId);
       return authed()
-        && h.exists
-        && string(h.data.get('primaryAdminUid', '')) == string(uid());
+        && exists(/databases/$(database)/documents/households/$(householdId))
+        && h.data.get('primaryAdminUid', '') == uid();
     }
 
     // users/{uid} is written by Cloud Functions / Admin SDK. Use it as a safe fallback when
@@ -48,9 +48,9 @@ service cloud.firestore {
       let hid = u.data.get('householdId', '');
       let role = u.data.get('role', '');
       return authed()
-        && u.exists
-        && string(hid) == string(householdId)
-        && string(role) in allowedRoles;
+        && exists(/databases/$(database)/documents/users/$(uid()))
+        && hid == householdId
+        && role in allowedRoles;
     }
 
     function hasAdminAccessToHousehold(householdId) {
