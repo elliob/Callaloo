@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Callaloo — Family grocery lists &amp; order requests</title>
+    <meta
+      name="description"
+      content="Callaloo helps households keep a shared grocery list and send order requests to the family admin."
+    />
+    <link rel="icon" href="./callaloo-mark.png" type="image/png" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <header class="site-header">
+        <div class="wrap">
+          <a class="brand" href="./">
+            <img src="./callaloo-mark.png" alt="" width="48" height="48" />
+            <span class="brand-text">
+              <span class="brand-name">Callaloo</span>
+              <span class="brand-tag">Shared lists for your household</span>
+            </span>
+          </a>
+        </div>
+      </header>
+
+      <main class="hero">
+        <div class="wrap">
+          <h1>Groceries, organized together.</h1>
+          <p class="lede">
+            Callaloo is a simple way for families to maintain a shared grocery list and let parents send
+            <strong>order requests</strong> when it is time to restock—so everyone stays in sync.
+          </p>
+          <div class="panel">
+            <h2>Built for real households</h2>
+            <p>
+              One admin keeps the list current; parents pick what they need and tap Order. You handle checkout
+              your way—Callaloo focuses on clarity and timing, not replacing your favorite store.
+            </p>
+          </div>
+        </div>
+      </main>
+
+      <footer class="site-footer">
+        <div class="wrap footer-inner">
+          <nav class="footer-links" aria-label="Legal">
+            <a href="./terms.html">Terms of Service</a>
+            <a href="./privacy.html">Privacy Policy</a>
+          </nav>
+          <p class="copyright">© <span id="y"></span> Callaloo</p>
+        </div>
+      </footer>
+    </div>
+    <script>
+      document.getElementById("y").textContent = new Date().getFullYear();
+    </script>
+  </body>
+</html>
