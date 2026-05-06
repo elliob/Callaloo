@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct AdminFamilyView: View {
     @Environment(SessionStore.self) private var session
@@ -50,11 +51,21 @@ struct AdminFamilyView: View {
                                         .fill(Color(.secondarySystemGroupedBackground))
                                 }
 
-                            ShareLink(item: inviteId, subject: Text("Callaloo invite"), message: Text("Use this code in Callaloo to join our family list: \(inviteId)")) {
-                                Label("Share code", systemImage: "square.and.arrow.up")
-                                    .frame(maxWidth: .infinity)
+                            HStack(spacing: 12) {
+                                Button {
+                                    UIPasteboard.general.string = inviteId
+                                } label: {
+                                    Label("Copy code", systemImage: "doc.on.doc")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(CallalooSecondaryCTAButtonStyle())
+
+                                ShareLink(item: inviteId, subject: Text("Callaloo invite"), message: Text("Use this code in Callaloo to join our family list: \(inviteId)")) {
+                                    Label("Share code", systemImage: "square.and.arrow.up")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(CallalooSecondaryCTAButtonStyle())
                             }
-                            .buttonStyle(CallalooSecondaryCTAButtonStyle())
                         }
                         .padding(18)
                         .frame(maxWidth: .infinity, alignment: .leading)

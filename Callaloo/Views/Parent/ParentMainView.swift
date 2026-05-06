@@ -52,11 +52,12 @@ struct ParentMainView: View {
                             Button {
                                 toggleSelection(item.id)
                             } label: {
-                                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                                HStack(alignment: .center, spacing: 12) {
                                     Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                                         .font(.title3)
                                         .foregroundStyle(isSelected ? Color.accentColor : .secondary.opacity(0.55))
                                         .accessibilityHidden(true)
+                                    ListItemPhotoThumbnail(photoData: item.photoData, size: 46)
                                     Text(item.title)
                                         .font(.body.weight(.medium))
                                         .foregroundStyle(.primary)
@@ -232,9 +233,9 @@ private struct ParentThanksView: View {
                     .accessibilityHidden(true)
 
                 VStack(spacing: 10) {
-                    Text("Request sent")
+                    Text("Request sent!")
                         .font(.title.bold())
-                    Text("Your family shopper has the list. Delivery timing depends on how they fulfill orders.")
+                    Text("Your family shopper has your list and will take it from here. Delivery timing will depend on how they fulfill orders.")
                         .font(.body)
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.secondary)

@@ -139,6 +139,25 @@ a:hover {
   gap: 16px;
 }
 
+.footer-start {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-support {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.footer-support a {
+  color: inherit;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .footer-links {
   display: flex;
   flex-wrap: wrap;

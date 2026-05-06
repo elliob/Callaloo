@@ -9,6 +9,7 @@ struct ListItem: Identifiable, Hashable, Sendable {
     var id: String
     var title: String
     var notes: String
+    var photoData: Data?
     var isFavorite: Bool
     var sortOrder: Int
     var active: Bool
@@ -20,6 +21,7 @@ struct ListItem: Identifiable, Hashable, Sendable {
             id: document.documentID,
             title: title,
             notes: data["notes"] as? String ?? "",
+            photoData: data["photoData"] as? Data,
             isFavorite: data["isFavorite"] as? Bool ?? false,
             sortOrder: data["sortOrder"] as? Int ?? 0,
             active: data["active"] as? Bool ?? true
@@ -27,12 +29,16 @@ struct ListItem: Identifiable, Hashable, Sendable {
     }
 
     func asFirestoreData() -> [String: Any] {
-        [
+        var data: [String: Any] = [
             "title": title,
             "notes": notes,
             "isFavorite": isFavorite,
             "sortOrder": sortOrder,
             "active": active,
         ]
+        if let photoData {
+            data["photoData"] = photoData
+        }
+        return data
     }
 }

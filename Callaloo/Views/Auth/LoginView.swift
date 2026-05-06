@@ -102,7 +102,7 @@ struct LoginView: View {
                 .frame(maxWidth: CallalooTheme.contentMaxWidth)
                 .frame(maxWidth: .infinity)
             }
-            .callalooAuthBackground()
+            .callalooAuthBackground(includeLoopingVideoBackground: true)
             .scrollDismissesKeyboard(.interactively)
             .navigationBarTitleDisplayMode(.inline)
             .overlay {

@@ -15,17 +15,23 @@ enum CallalooTheme {
 
 extension View {
     /// Soft branded backdrop for full-screen flows (sign-in, onboarding).
-    func callalooAuthBackground() -> some View {
+    /// When `includeLoopingVideoBackground` is true, bundled login clips play muted on a loop behind the gradient (login / register only).
+    func callalooAuthBackground(includeLoopingVideoBackground: Bool = false) -> some View {
         background {
-            LinearGradient(
-                colors: [
-                    Color.accentColor.opacity(0.14),
-                    Color(.systemGroupedBackground),
-                    Color(.systemGroupedBackground),
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            ZStack {
+                if includeLoopingVideoBackground, !AuthLoopingVideoBackground.bundleVideoURLs().isEmpty {
+                    AuthLoopingVideoBackground()
+                }
+                LinearGradient(
+                    colors: [
+                        Color.accentColor.opacity(0.14),
+                        Color(.systemGroupedBackground),
+                        Color(.systemGroupedBackground),
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            }
             .ignoresSafeArea()
         }
     }
