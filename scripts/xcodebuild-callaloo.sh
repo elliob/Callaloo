@@ -15,4 +15,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 export FIREBASE_SOURCE_FIRESTORE=1
+if command -v launchctl >/dev/null 2>&1; then
+  launchctl setenv FIREBASE_SOURCE_FIRESTORE 1 2>/dev/null || true
+fi
 exec xcodebuild -project "$ROOT/Callaloo.xcodeproj" "$@"

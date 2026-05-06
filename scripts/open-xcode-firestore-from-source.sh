@@ -24,6 +24,18 @@
 #   ./scripts/xcodebuild-callaloo.sh -scheme Callaloo -destination 'generic/platform=iOS' archive
 #
 # Quit Xcode before running this script so the new environment is picked up.
+#
+# If Xcode reports missing FirebaseFirestoreInternal.xcframework under DerivedData:
+#   1) quit Xcode, run ./scripts/repair-firestore-spm-cache.sh --reset-spm, then open with this script.
+#   2) last resort (binary artifact missing on disk): ./scripts/install-firestore-internal-xcframework-artifact.sh
+#
+# SPM reads FIREBASE_SOURCE_FIRESTORE from the process environment when it evaluates
+# firebase-ios-sdk's Package.swift. `open --env` only applies when Xcode is NOT already
+# running; we also set it via launchctl so GUI Xcode typically inherits it for this session.
+# To clear: launchctl unsetenv FIREBASE_SOURCE_FIRESTORE
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+if command -v launchctl >/dev/null 2>&1; then
+  launchctl setenv FIREBASE_SOURCE_FIRESTORE 1 2>/dev/null || true
+fi
 exec open --env FIREBASE_SOURCE_FIRESTORE=1 "$ROOT/Callaloo.xcodeproj"
